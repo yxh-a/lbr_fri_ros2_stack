@@ -459,19 +459,15 @@ bool SystemInterface::verify_number_of_joints_() {
 bool SystemInterface::verify_joint_command_interfaces_() {
   // check command interfaces
   for (auto &joint : info_.joints) {
-    if (joint.command_interfaces.size() != LBR_FRI_COMMAND_INTERFACE_SIZE) {
-      RCLCPP_ERROR_STREAM(rclcpp::get_logger(LOGGER_NAME),
-                          lbr_fri_ros2::ColorScheme::ERROR
-                              << "Joint '" << joint.name.c_str()
-                              << "' received invalid number of command interfaces. Received '"
-                              << joint.command_interfaces.size() << "', expected "
-                              << static_cast<int>(LBR_FRI_COMMAND_INTERFACE_SIZE)
-                              << lbr_fri_ros2::ColorScheme::ENDC);
-      return false;
-    }
+    bool has_position_command_interface = false;
+    bool has_effort_command_interface = false;
+
     for (auto &ci : joint.command_interfaces) {
-      if (ci.name != hardware_interface::HW_IF_POSITION &&
-          ci.name != hardware_interface::HW_IF_EFFORT) {
+      if (ci.name == hardware_interface::HW_IF_POSITION) {
+        has_position_command_interface = true;
+      } else if (ci.name == hardware_interface::HW_IF_EFFORT) {
+        has_effort_command_interface = true;
+      } else {
         RCLCPP_ERROR_STREAM(rclcpp::get_logger(LOGGER_NAME),
                             lbr_fri_ros2::ColorScheme::ERROR
                                 << "Joint '" << joint.name.c_str()
@@ -481,6 +477,19 @@ bool SystemInterface::verify_joint_command_interfaces_() {
                                 << lbr_fri_ros2::ColorScheme::ENDC);
         return false;
       }
+    }
+
+    if (joint.command_interfaces.size() != 2u || !has_position_command_interface ||
+        !has_effort_command_interface) {
+      RCLCPP_ERROR_STREAM(rclcpp::get_logger(LOGGER_NAME),
+                          lbr_fri_ros2::ColorScheme::ERROR
+                              << "Joint '" << joint.name.c_str()
+                              << "' received invalid command interfaces. Expected exactly '"
+                              << hardware_interface::HW_IF_POSITION << "' and '"
+                              << hardware_interface::HW_IF_EFFORT << "', received "
+                              << joint.command_interfaces.size() << " command interface(s)."
+                              << lbr_fri_ros2::ColorScheme::ENDC);
+      return false;
     }
   }
   return true;

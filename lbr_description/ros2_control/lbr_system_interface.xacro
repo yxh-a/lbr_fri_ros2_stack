@@ -98,18 +98,20 @@
             <xacro:macro name="joint_interface"
                 params="name min_position max_position max_velocity max_torque mode initial_position">
                 <joint name="${name}">
-                    <command_interface name="position">
+                    <xacro:if
+                        value="${mode != 'gazebo' or system_config['hardware']['client_command_mode'] == 'position'}">
+                        <command_interface name="position">
                         <param name="min">${min_position}</param>
                         <param name="max">${max_position}</param>
-                    </command_interface>
-                    <!-- only single command interface, refer
-                    https://github.com/ros-controls/gz_ros2_control/issues/182 -->
-                    <xacro:unless value="${mode == 'gazebo'}">
+                        </command_interface>
+                    </xacro:if>
+                    <xacro:if
+                        value="${mode != 'gazebo' or system_config['hardware']['client_command_mode'] == 'torque'}">
                         <command_interface name="effort">
                             <param name="min">-${max_torque}</param>
                             <param name="max"> ${max_torque}</param>
                         </command_interface>
-                    </xacro:unless>
+                    </xacro:if>
                     <state_interface name="position"> 
                       <param name="initial_value">${initial_position}</param>
                     </state_interface>

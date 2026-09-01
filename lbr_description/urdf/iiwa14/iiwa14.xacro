@@ -14,6 +14,9 @@
     <xacro:arg
         name="initial_joint_positions_path"
         default="$(find lbr_description)/ros2_control/initial_joint_positions.yaml" />
+    <xacro:arg
+        name="gazebo_controllers_path"
+        default="$(find lbr_description)/ros2_control/lbr_controllers.yaml" />
 
     <!-- KDL requires a link without inertia / Gazebo requires a connection to world link or robot
     will tipple https://github.com/lbr-stack/lbr_fri_ros2_stack/issues/230 -->
@@ -31,5 +34,6 @@
         robot_name="$(arg robot_name)"
         mode="$(arg mode)"
         system_config_path="$(arg system_config_path)"
-        initial_joint_positions_path="$(arg initial_joint_positions_path)" />
+        initial_joint_positions_path="$(arg initial_joint_positions_path)"
+        gazebo_controllers_path="$(arg gazebo_controllers_path)" />
 </robot>
